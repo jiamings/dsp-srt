@@ -34,7 +34,7 @@
 % Employ the following version of the ``usepackage'' statement for
 % submitting the draft version of the paper for review.  This will set
 % the note in the first column to ``Under review.  Do not distribute.''
-\usepackage{icml2014} 
+\usepackage[accepted]{icml2014} 
 % Employ this version of the ``usepackage'' statement after the paper has
 % been accepted, when creating the final version.  This will set the
 % note in the first column to ``Proceedings of the...''
@@ -43,501 +43,199 @@
 
 % The \icmltitle you define below is probably too long as a header.
 % Therefore, a short form for the running title is supplied here:
-\icmltitlerunning{Submission and Formatting Instructions for ICML 2014}
+\icmltitlerunning{An Implementation of Video Sementaition and Classifcation}
 
 \begin{document} 
 
 \twocolumn[
-\icmltitle{Submission and Formatting Instructions for the Thirty-first \\ 
-           International Conference on Machine Learning (ICML 2014)}
+\icmltitle{An Implementation of Video Sementaition and Classifcation\\ based on Video Features Extraction and Machine Learning}
 
-% It is OKAY to include author information, even for blind
-% submissions: the style file will automatically remove it for you
-% unless you've provided the [accepted] option to the icml2014
-% package.
-\icmlauthor{Your Name}{email@yourdomain.edu}
-\icmladdress{Your Fantastic Institute,
-            314159 Pi St., Palo Alto, CA 94306 USA}
-\icmlauthor{Your CoAuthor's Name}{email@coauthordomain.edu}
-\icmladdress{Their Fantastic Institute,
-            27182 Exp St., Toronto, ON M6H 2T1 CANADA}
-
-% You may provide any keywords that you 
-% find helpful for describing your paper; these are used to populate 
-% the "keywords" metadata in the PDF but will not be shown in the document
-\icmlkeywords{boring formatting information, machine learning, ICML}
+\icmlauthor{Jiaming Song}{jiaming.tsong@gmail.com}
+\icmladdress{Computer Science and Technology Department, Tsinghua University}
+\icmlauthor{Gerald Yankai Zhang}{zyk12@mails.tsinghua.edu.cn}
+\icmladdress{Computer Science and Technology Department, Tsinghua University}
 
 \vskip 0.3in
 ]
 
 \begin{abstract} 
-There are two review cycles for ICML 2014, with full paper submissions 
-due on October 4, 2013 and January 31, 2014. Reviewing 
-will be blind to the identities of the authors, and therefore identifying
-information must not appear in any way in papers submitted for review. 
-Submissions must be in PDF, with an 8 page length limit ( 9 pages are allowed if the 9-th page contains \emph{only} references).
+We present our system for video segmentation and classification with a novel way to extract multimedia features and to utilize machine learning methods. We extract SPP, HOG and DNN as visual features, LPC and MFCC as audio features from the original video file. We combine the features and then classify the video into five genres. We use the classification information to gather shots into programs. We implement an application that can parse the result of our algorithm, and playback the video with these additional information. We estimate our method and prove the robustness and efficent beyond traditional methods. 
 \end{abstract} 
 
-\section{Electronic Submission}
-\label{submission}
+\section{Introduction}
 
-As in the past few years, ICML will rely exclusively on
-electronic formats for submission and review. 
+In these days on the Internet, we have witnessed the continue increase of available network bandwidth. The network is capable to deal with video streams with higher and higher bitrates. Thus we are not surprised to see that video data are taking larger part of total network data. In compare with the fast development of network capability and the convenience brought by the feature of uploading self-made videos, the lack of detailed video description information is still an open problem that urges to be solved. For instance, most of the users are only interested in some specific parts of a video stream. Usually, users do not like the repeating opening and ending of a series. It is impossible to tag them by human hands. If there is a tool that can tag them automatically once the videos are uploaded, the experience of video watching will be greatly increased.
 
+On the other hand, thanks to the flourish of machine learning, many problems which are once believed unsolvable are neatly settled. For instance, the computers are able to classify video and audio information into multiple genres with an incredible precision. But the true power of deep learning is still waiting to be developed.
 
-\subsection{Templates for Papers}
+In this application condition and theoretical background, we believe it is a right time to present our research topic, a video segmentation and classification system based on video features extraction and deep learning. It is a system that can segment a long video into individual programs and classify these programs into various genres. For each program, users can choose to watch some selected part of programs and ignore some of them, e.g. opening and ending of a program. 
 
-Electronic templates for producing papers for submission are available
-for \LaTeX\/ . Templates are accessible on the World
-Wide Web at:\\
-\textbf{\texttt{http://icml.cc/2014/}}
+Our work is with the following contributions: 1) A set of video and audio features that can be used to solve programs classification and video segmentation problems in the future. 2) We present a novel application scenario for machine learning. 3) A fully functioned video processing and playback application that can be used in further study purpose.
 
-\noindent
-Send questions about these electronic templates to
-\texttt{program@icml.cc}.
+The challenges that we are facing are listed as follows: 1) To combine multimedia information, we need to handle audio and video information properly at the same time. 2) To increase the precision of segmentation and classification, we need to try various ways in order to enhance the performance of our system. 3) To deal with the large amount of information, we need to find the balance point between running time and integrity of information.
 
-The formatting instructions below will be enforced for initial submissions and camera-ready copies. 
+The rest of this article will be arranged as follows: In Section 2, we introduce our methodology with explanations of features and algorithms we use. In Section 3, we briefly demonstrate our application. With dataset information presented, we describe our experiment environment and estimate our experiment in detail. In Section 4, we propose our plan for future work and time table.
+
+\section{Methodology}
+
+\subsection{Video Segmentation}
+For video segmentation, we use the software proposed by (cite), which enables fast shot segmentation using global and local visual descriptors. This method can generate segments of shots from one video, which has fairly high accuracy. We did not use scene segmentation, since the scenes can be segmented by classification results - we can combine the continuing shots with the same label into a scene of the label, thus finishing the task fo scene segmentation using shot segmentation.
+\subsection{Video Classification Pipeline}
+After shots are segmented from a video, we train a classifier to predict the label for one particular shot. For speed and scalability, we extract two feature vectors from the frames and sound of the shot respectively; Then, we train these feature vector separately using popular classfication techniques such as the support vector machine(cite needed); Finally, we combine the weights of the two classifiers by selecting a weight parameter $p$, where $0 < p < 1$. \par
+The reason we train two classifiers separately is as follows:
 \begin{itemize}
-\item The maximum paper length is 8 pages excluding references, and 
-9 pages including references.
-\item Do not alter the style template; in particular, do not compress the paper format 
-by reducing the vertical spaces.
-\item Do not include author information or acknowledgments in your
-  initial submission. 
-\item Place figure captions {\em under} the figure (and omit titles from
-  inside the graphic file itself).  Place table captions {\em over}
-  the table.
-\item References must include page numbers whenever possible and be as
-  complete as possible.  Place multiple citations in chronological order.  
+\item The dimensions of the feature vector from frames and sound vary significantly. For popular image classification techniques(cite HOG and SIFT), thousands of features can be extracted from one image, whilst for the audio feature extraction technique MFCC(cite needed), the length of feature vector is 12.
+\item In some cases, using only the frame(or the audio) data could lead to false predictions. For example, when a news show is reporting wildlife protection, using only the frame data would likely result in labeling the shot as "nature", but we can ascertain that the shot is "news" based on the voice of the speaker.
 \end{itemize}
-Please see below for details on each of these items.
+In both settings, we use the LIBLINEAR library for our SVM classifier, which narrows the classification problem down to feature extraction.
+\subsection{Frame Feature Extraction Techniques}
+Feature extraction for a particular frame is largely equivalent to image feature extraction. Therefore, popular image feature extraction techniques are used in our methods. In the following subsections, we present three techniques.
+\subsubsection{Spatial Pyramid Pooling}(cite)
+Let us construct a sequence of grids at level $0 \ldots L$, such that grid at level $l$ has $2^l$ cells along each dimension. For one image, we use average pooling for each grid, and compute one feature. Combining all the features of every grid in every level, and we have $\sum_{l=0}^{L} 4^l$ features extracted from one image. Figure \ref{fig:spp} demonstrates our method.
 
-\subsection{Submitting Papers}
+%\begin{figure}[H]
+%\centering
+%\includegraphics[width=0.8\textwidth]{spp.png}
+%\label{fig:spp}
+%\caption{Spatial Pyramid Pooling}
+%\end{figure}
 
-Submission to ICML 2014 will be entirely electronic, via a web site
-(not email).  The URL and information about the submission process
-are available on the conference web site at
+\subsubsection{Histogram of Oriented Gradients}
+Histogram of Oriented Gradients(HOG) are feature descriptors used in computer vision and image processing for the purpose of object detection. The technique counts occurences of gradient orientation in localized portions of an image. HOG descriptors maintains a few advantages over other methods, since it upholds invariance to geometric and photometric transformations, except for object orientation.\par
+HOG descriptors are computed using the following steps:
+\begin{description}
+\item[Gradient Computation] The first step of HOG computes the gradient values, mostly by using the 1-D centered, point discrete derivative mask in one or both of the horizontal and vertical directions.
+\item[Orientation Binning] The second step consists of creating the cell histograms. Each pixel within the cell casts a weighted vote for an orientation-based histogram channel based on values found in the gradient computation.
+\item[Descriptor Blocks] The third step involves grouping the cells into larger, spatially connected blocks. The HOG descriptor is then the vector of the components of the locally normalized cell histograms from all of the block regions.
+\end{description}
+In our setting, we scale each image to size $128 \times 128$ and use non-overlapping blocks of size $32 \times 32$, resulting in a 11340 dimensional feature vector. We further trim the feature vector by $75\%$, using $2835$ features each image for training.
 
-\textbf{\texttt{http://icml.cc/2014/}}
+\subsubsection{Deep Convolutional Activation Feature}
+Recent advances in deep learning have enable researchers to apply deep convolutional neural networks (CNN) to large-scale visual recognition tasks. These models perform extremely well in domains with large amounts of training data, outperforming all known methods on a large scale recognition challenge.\par
+However, in other tasks with limited training data, deep neural networks tend to dramatically overfit. To deal with this problem, Donahue et al.(cite) explored a semi-supervised, transfer learning method, which uses a supervised pre-trained deep neural network to extract features. One popular feature selection method is to use activation values in one layer of deep neural network. Donahue et al. have empiracally validated that a generic visual feature based on a convolutional network trained on the ImageNet dataset(cite) outperforms a host of conventional visual representations on standard benchmark object recognition tasks.\par
+In our setting, we use the famous AlexNet by Krizhevsky et al. (cite), which contains eight layers with weights: the first five are convolutional and the remaining three are fully connected. The output of the last fully-connected layer is fed to a 1000-way softmax which produces a distribution over the 1000 class labels. The structure of the AlexNet is in figure \ref{fig:alexnet}. Please refer to (cite) for more details of the network. \par
 
-{\bf Paper Deadline:} The deadline for paper submission to ICML 2014
-is at 23:59 Universal Time (3:59 Pacific Daylight Time) on the due dates
-(October 4, or January 31, depending on the review cycle).  
-If your full submission does not reach us by this time, it will 
-not be considered for publication. There is no separate abstract submission.
+%\begin{figure}
+%\includegraphics[width=1.0\textwidth]{alexnet.png}
+%\label{fig:alexnet}
+%\caption{Structure of AlexNet}
+%\end{figure}
 
-{\bf Anonymous Submission:} To facilitate blind review, no identifying
-author information should appear on the title page or in the paper
-itself.  Section~\ref{author info} will explain the details of how to
-format this.
+We use the seventh layer of AlexNet, which has 4096 neuron activations, as our extracted features. We use Caffe(cite), an open source framework for training deep nerual networks on GPUs, and a model trained on ImageNet using Caffe, to extract our features. For each image, we simply do forward propagation, using the image pixel intesities as inputs, and compute the neuron activations of the particular level. Using a GPU, we can speed up the computation by 5 to 10 times.
 
-{\bf Simultaneous Submission:} ICML will not accept any paper which,
-at the time of submission, is under review for another conference or
-has already been published. This policy also applies to papers that
-overlap substantially in technical content with conference papers
-under review or previously published. ICML submissions must not be
-submitted to other conferences during ICML's review period. Authors
-may submit to ICML substantially different versions of journal papers
-that are currently under review by the journal, but not yet accepted
-at the time of submission. Informal publications, such as technical
-reports or papers in workshop proceedings which do not appear in
-print, do not fall under these restrictions.
+\subsection{Audio Feature Extraction Techniques}
+\subsubsection{Mel-Frequency Cepstrum Coefficients}
+In sound processing, the mel-frequency cepstrum is a representation of the short-term power spectrum of a sound, based on a linear cosine transform of a log power spectrum on a non-linear mel scale of frequency. Mel-frequency cepstrum coefficients(MFCCs) are coefficients that collectively make up an MFC, which are derived from a type of cepstral representation of the audio clip. MFCCs are commonly derived as follows:
+\begin{enumerate}
+\item Take the Fourier transform of a signal
+\item Map the powers of the spectrum obtained above onto the mel scale, using triangular overlapping windows.
+\item Take the logs of the powers at each of the mel frequencies.
+\item Take the discrete cosine transform of the list of mel log powers, as if it were a signal.
+\item The MFCs are the amplitudes of the resulting spectrum.
+\end{enumerate}
+In our setting, we compute the average MFCCs for each shot, so that each shot generates a 12-dimensional feature vector.
+\subsubsection{Linear Prediction Coefficients(LPCs)}
+Linear prediction is a mathematical opearation where future values of discrete-time signal are estimated as a linear function of previous samples. The most common representation is 
+$$ \hat{x}(n) = \sum_{i=1}^{p} a_i x(n-i)$$
+where $\hat{x}(n)$ is the predicted signal value, $x(n-i)$ is the previous observed values, and $a_i$ are the predictor coefficients. The error generated by this estimate is 
+$$ e(n) = x(n) - \hat{x}(n)$$
+where $x(n)$ is the true signal value. \par
+The most common choice in optimization of parameters $a_i$ is the root mean square criterion which is also called the auto-correlation criterion. In this method we minimize the L2 norm, which yields the equation:
+$$\sum_{i=1}^{p} a_i R(j-i) = -R(j)$$
+for $1 \leq j \leq p$, where $R$ is the auto correlation of signal $x_n$, defined as
+$$R(i) = \mathrm{E}[x(n)x(n-i)]$$
+and $\mathrm{E}$ is the expected value.\par
+In our setting, we compute a 12-dimensional feature vector for the LPCs, which gives us a feature vector of length 24 after combining with MFCCs.
 
-\medskip
 
-To ensure our ability to print submissions, authors must provide their
-manuscripts in \textbf{PDF} format.  Furthermore, please make sure
-that files contain only Type-1 fonts (e.g.,~using the program {\tt
-  pdffonts} in linux or using File/DocumentProperties/Fonts in
-Acrobat).  Other fonts (like Type-3) might come from graphics files
-imported into the document.
+\section{Estimation}
 
-Authors using \textbf{Word} must convert their document to PDF.  Most
-of the latest versions of Word have the facility to do this
-automatically.  Submissions will not be accepted in Word format or any
-format other than PDF. Really. We're not joking. Don't send Word.
+\subsection{Dataset}
 
-Those who use \textbf{\LaTeX} to format their accepted papers need to
-pay close attention to the typefaces used.  Specifically, when
-producing the PDF by first converting the dvi output of \LaTeX\ to Postscript
-the default behavior is to use non-scalable Type-3 PostScript bitmap
-fonts to represent the standard \LaTeX\ fonts. The resulting document
-is difficult to read in electronic form; the type appears fuzzy. To
-avoid this problem, dvips must be instructed to use an alternative
-font map.  This can be achieved with
-something like the following commands:\\[0.5em]
-{\bf dvips -Ppdf -tletter -G0 -o paper.ps paper.dvi}\\
-{\bf ps2pdf paper.ps}\\[0.5em]
-Note that it is a zero following the ``-G''.  This tells dvips to use
-the config.pdf file (and this file refers to a better font mapping).
+  The video files in our dataset are collected from CNTV, Youku and Tudou. We manually seperate them into five genres: cartoon, music video(MV), lecture, nature scene, and news report. The total amount of the video information is approximately 1GB. 
 
-Another alternative is to use the \textbf{pdflatex} program instead of
-straight \LaTeX. This program avoids the Type-3 font problem, however
-you must ensure that all of the fonts are embedded (use {\tt
-pdffonts}). If they are not, you need to configure pdflatex to use a
-font map file that specifies that the fonts be embedded. Also you
-should ensure that images are not downsampled or otherwise compressed
-in a lossy way.
+  To eliminate the possible negative influence on algorithm performance caused by different video resolution and audio sample rate, these video files are resized and resampled after being downloaded. 
 
-Note that the 2014 style files use the {\tt hyperref} package to
-make clickable links in documents.  If this causes problems for you,
-add {\tt nohyperref} as one of the options to the {\tt icml2014}
-usepackage statement.
+  After processed by ffmpeg, a complete cross-platform solution to record, convert and stream audio and video, the parameters of final video files are listed below.
 
-\subsection{Reacting to Reviews}
-We will continue the ICML tradition in which the authors are given the
-option of providing a short reaction to the initial reviews. These
-reactions will be taken into account in the discussion among the
-reviewers and area chairs.
+  \begin{center}
+  \begin{tabular}{ccc}
+    \hline
+    Resolution & frames per second & audio sample rate\\
+    480*320 & 15 fps & 44100Hz\\
+    \hline
+  \end{tabular}
+  \end{center}
 
-\subsection{Submitting Final Camera-Ready Copy}
+  To simulate a continue video file for demo system, we concatenate the video segments to a long piece of video. At the same time, the cutting timestamps for different programs are recorded. The timestamps are used to estimate the precision of our system. 
 
-The final versions of papers accepted for publication should follow the
-same format and naming convention as initial submissions, except of
-course that the normal author information (names and affiliations)
-should be given.  See Section~\ref{final author} for details of how to
-format this.
+\subsection{Demo Application}
 
-The footnote, ``Preliminary work.  Under review by the International
-Conference on Machine Learning (ICML).  Do not distribute.'' must be
-modified to ``\textit{Proceedings of the
-$\mathit{31}^{st}$ International Conference on Machine Learning},
-Beijing, China, 2014.  JMLR: W\&CP volume 32. 
-Copyright 2014 by the author(s).''
+  To estimate the performance of the system, we implement an application for demonstration. This system is developed in C\#, in Microsoft .Net Framework. With windows media player module planted in the application, user can watch the video program by program seemlessly.
 
-For those using the \textbf{\LaTeX} style file, simply change
-$\mathtt{\backslash usepackage\{icml2014\}}$ to 
+  \begin{figure*}
+    \centering \includegraphics[width=\textwidth]{img/demo.png}
+    \caption{The interface of demo application}
+  \end{figure*}
 
-\verb|\usepackage[accepted]{icml2014}|
+  The features of the application are listed below.
 
-\noindent
-Authors using \textbf{Word} must edit the
-footnote on the first page of the document themselves.
+  \begin{enumerate}
+  \item The application can load from a description file that is the output of our algorithm. The description file contains cutting timestamps for different programs and genre classifications.
+  \item The application will fetch one frame as a summery of one program and display the frame as a thumbnail on the interface.
+  \item The application can provide a smooth watching experience. There will not be obvious gaps when switching programs. 
+  \item Users can filter through different genres of programs. They can choose to watch or not to watch some specific type of programs. Moreover, users can skip a single program without changing other programs with a same genre tag.
+  \item The feature of skipping openning and ending scene is on its way.
+  \end{enumerate}
 
-Camera-ready copies should have the title of the paper as running head
-on each page except the first one.  The running title consists of a
-single line centered above a horizontal rule which is $1$ point thick.
-The running head should be centered, bold and in $9$ point type.  The
-rule should be $10$ points above the main text.  For those using the
-\textbf{\LaTeX} style file, the original title is automatically set as running
-head using the {\tt fancyhdr} package which is included in the ICML
-2014 style file package.  In case that the original title exceeds the
-size restrictions, a shorter form can be supplied by using
+\subsection{Experiment}
 
-\verb|\icmltitlerunning{...}|
+\subsubsection{audio features}
 
-just before $\mathtt{\backslash begin\{document\}}$.
-Authors using \textbf{Word} must edit the header of the document themselves.
+To calculate LPCs and MFCC features, a python library essentia is used. Essentia is an open-source C++ library for audio analysis and audio-based music information retrieval with Python bindings.
 
-\section{Format of the Paper} 
- 
-All submissions must follow the same format to ensure the printer can
-reproduce them without problems and to let readers more easily find
-the information that they desire.
+To achieve a better performance, the video clips are segmented into shots firstly. For every single shot of video segment, we calculate the LPCs and MFCC with a window size of 0.02 microsecond and a hop size of 0.01 microsecond. For each slide of time, 12 LPCs and 12 MFCC values will be extracted. After LPCs and MFCC are extracted for a shot, the values will be averaged by time. Thus there will be 12 LPCs and 12 MFCC values for each shot eventually, i.e. 24 audio features for a single shot. 
 
-\subsection{Length and Dimensions}
+After audio features extracted, LibSVM is used to estimate the features. The video clips are randomly shaffled into two gruops, the training group and the prediction group. 
 
-Papers must not exceed eight (8) pages, including all figures, tables,
-and appendices, but excluding references. When references are included,
-the paper must not exceed nine (9) pages. Any submission that exceeds 
-this page limit or that diverges significantly from the format specified 
-herein will be rejected without review.
+Since most of the video clips in the predicition group have a close copy in the training group, the accuracy achieves as high as over 80\%. And both the feature extraction and LibSVM can be done in less than one minute.
 
-The text of the paper should be formatted in two columns, with an
-overall width of 6.75 inches, height of 9.0 inches, and 0.25 inches
-between the columns. The left margin should be 0.75 inches and the top
-margin 1.0 inch (2.54~cm). The right and bottom margins will depend on
-whether you print on US letter or A4 paper, but all final versions
-must be produced for US letter size.
+The experiment for a larger dataset is on its way.
 
-The paper body should be set in 10~point type with a vertical spacing
-of 11~points. Please use Times  typeface throughout the text.
-%Please use the default typeface (Computer Modern) throughout the text.
+\subsubsection{combined experiment}
 
-\subsection{Title}
+The experiments which combine visual and audio features are on their way.
 
-The paper title should be set in 14~point bold type and centered
-between two horizontal rules that are 1~point thick, with 1.0~inch
-between the top rule and the top edge of the page. Capitalize the
-first letter of content words and put the rest of the title in lower
-case.
+\section{Future work}
 
-\subsection{Author Information for Submission}
-\label{author info}
+We will focus on combining visual and audio features in the near future. This work will be settled in one week.
 
-To facilitate blind review, author information must not appear.  If
-you are using \LaTeX\/ and the \texttt{icml2014.sty} file, you may use
-\verb+\icmlauthor{...}+ to specify authors.  The author information
-will simply not be printed until {\tt accepted} is an argument to the
-style file. Submissions that include the author information will not
-be reviewed.
+Secondly, we plan to come up with a method to combine shots into programs, and run estimations and experiments on shot combining. This may take us two weeks to make it done.
 
-\subsubsection{Self-Citations}
+The following table contains more information in detail.
 
-If your are citing published papers for which you are an author, refer
-to yourself in the third person. In particular, do not use phrases
-that reveal your identity (e.g., ``in previous work \cite{langley00}, we 
-have shown \ldots'').
-
-Do not anonymize citations in the reference section by removing or
-blacking out author names. The only exception are manuscripts that are
-not yet published (e.g. under submission). If you choose to refer to
-such unpublished manuscripts \cite{anonymous}, anonymized copies have 
-to be submitted
-as Supplementary Material via CMT. However, keep in mind that an ICML
-paper should be self contained and should contain sufficient detail
-for the reviewers to evaluate the work. In particular, reviewers are
-not required to look a the Supplementary Material when writing their
-review.
-
-\subsubsection{Camera-Ready Author Information}
-\label{final author}
-
-If a paper is accepted, a final camera-ready copy must be prepared.
-%
-For camera-ready papers, author information should start 0.3~inches
-below the bottom rule surrounding the title. The authors' names should
-appear in 10~point bold type, electronic mail addresses in 10~point
-small capitals, and physical addresses in ordinary 10~point type.
-Each author's name should be flush left, whereas the email address
-should be flush right on the same line. The author's physical address
-should appear flush left on the ensuing line, on a single line if
-possible. If successive authors have the same affiliation, then give
-their physical address only once.
-
-A sample file (in PDF) with author names is included in the ICML2014 
-style file package.
-
-\subsection{Abstract}
-
-The paper abstract should begin in the left column, 0.4~inches below
-the final address. The heading `Abstract' should be centered, bold,
-and in 11~point type. The abstract body should use 10~point type, with
-a vertical spacing of 11~points, and should be indented 0.25~inches
-more than normal on left-hand and right-hand margins. Insert
-0.4~inches of blank space after the body. Keep your abstract brief and 
-self-contained,
-limiting it to one paragraph and no more than six or seven sentences.
-
-\subsection{Partitioning the Text} 
-
-You should organize your paper into sections and paragraphs to help
-readers place a structure on the material and understand its
-contributions.
-
-\subsubsection{Sections and Subsections}
-
-Section headings should be numbered, flush left, and set in 11~pt bold
-type with the content words capitalized. Leave 0.25~inches of space
-before the heading and 0.15~inches after the heading.
-
-Similarly, subsection headings should be numbered, flush left, and set
-in 10~pt bold type with the content words capitalized. Leave
-0.2~inches of space before the heading and 0.13~inches afterward.
-
-Finally, subsubsection headings should be numbered, flush left, and
-set in 10~pt small caps with the content words capitalized. Leave
-0.18~inches of space before the heading and 0.1~inches after the
-heading. 
-
-Please use no more than three levels of headings.
-
-\subsubsection{Paragraphs and Footnotes}
-
-Within each section or subsection, you should further partition the
-paper into paragraphs. Do not indent the first line of a given
-paragraph, but insert a blank line between succeeding ones.
- 
-You can use footnotes\footnote{For the sake of readability, footnotes
-should be complete sentences.} to provide readers with additional
-information about a topic without interrupting the flow of the paper. 
-Indicate footnotes with a number in the text where the point is most
-relevant. Place the footnote in 9~point type at the bottom of the
-column in which it appears. Precede the first footnote in a column
-with a horizontal rule of 0.8~inches.\footnote{Multiple footnotes can
-appear in each column, in the same order as they appear in the text,
-but spread them across columns and pages if possible.}
-
-\begin{figure}[ht]
-\vskip 0.2in
 \begin{center}
-\centerline{\includegraphics[width=\columnwidth]{icml_numpapers}}
-\caption{Historical locations and number of accepted papers for International
-  Machine Learning Conferences (ICML 1993 -- ICML 2008) and
-  International Workshops on Machine Learning (ML 1988 -- ML
-  1992). At the time this figure was produced, the number of
-  accepted papers for ICML 2008 was unknown and instead estimated.}
-\label{icml-historical}
-\end{center}
-\vskip -0.2in
-\end{figure} 
-
-\subsection{Figures}
- 
-You may want to include figures in the paper to help readers visualize
-your approach and your results. Such artwork should be centered,
-legible, and separated from the text. Lines should be dark and at
-least 0.5~points thick for purposes of reproduction, and text should
-not appear on a gray background.
-
-Label all distinct components of each figure. If the figure takes the
-form of a graph, then give a name for each axis and include a legend
-that briefly describes each curve. Do not include a title inside the
-figure; instead, the caption should serve this function.
-
-Number figures sequentially, placing the figure number and caption
-{\it after\/} the graphics, with at least 0.1~inches of space before
-the caption and 0.1~inches after it, as in
-Figure~\ref{icml-historical}.  The figure caption should be set in
-9~point type and centered unless it runs two or more lines, in which
-case it should be flush left.  You may float figures to the top or
-bottom of a column, and you may set wide figures across both columns
-(use the environment {\tt figure*} in \LaTeX), but always place
-two-column figures at the top or bottom of the page.
-
-\subsection{Algorithms}
-
-If you are using \LaTeX, please use the ``algorithm'' and ``algorithmic'' 
-environments to format pseudocode. These require 
-the corresponding stylefiles, algorithm.sty and 
-algorithmic.sty, which are supplied with this package. 
-Algorithm~\ref{alg:example} shows an example. 
-
-\begin{algorithm}[tb]
-   \caption{Bubble Sort}
-   \label{alg:example}
-\begin{algorithmic}
-   \STATE {\bfseries Input:} data $x_i$, size $m$
-   \REPEAT
-   \STATE Initialize $noChange = true$.
-   \FOR{$i=1$ {\bfseries to} $m-1$}
-   \IF{$x_i > x_{i+1}$} 
-   \STATE Swap $x_i$ and $x_{i+1}$
-   \STATE $noChange = false$
-   \ENDIF
-   \ENDFOR
-   \UNTIL{$noChange$ is $true$}
-\end{algorithmic}
-\end{algorithm}
- 
-\subsection{Tables} 
- 
-You may also want to include tables that summarize material. Like 
-figures, these should be centered, legible, and numbered consecutively. 
-However, place the title {\it above\/} the table with at least 
-0.1~inches of space before the title and the same after it, as in 
-Table~\ref{sample-table}. The table title should be set in 9~point 
-type and centered unless it runs two or more lines, in which case it
-should be flush left.
-
-% Note use of \abovespace and \belowspace to get reasonable spacing 
-% above and below tabular lines. 
-
-\begin{table}[t]
-\caption{Classification accuracies for naive Bayes and flexible 
-Bayes on various data sets.}
-\label{sample-table}
-\vskip 0.15in
-\begin{center}
-\begin{small}
-\begin{sc}
-\begin{tabular}{lcccr}
-\hline
-\abovespace\belowspace
-Data set & Naive & Flexible & Better? \\
-\hline
-\abovespace
-Breast    & 95.9$\pm$ 0.2& 96.7$\pm$ 0.2& $\surd$ \\
-Cleveland & 83.3$\pm$ 0.6& 80.0$\pm$ 0.6& $\times$\\
-Glass2    & 61.9$\pm$ 1.4& 83.8$\pm$ 0.7& $\surd$ \\
-Credit    & 74.8$\pm$ 0.5& 78.3$\pm$ 0.6&         \\
-Horse     & 73.3$\pm$ 0.9& 69.7$\pm$ 1.0& $\times$\\
-Meta      & 67.1$\pm$ 0.6& 76.5$\pm$ 0.5& $\surd$ \\
-Pima      & 75.1$\pm$ 0.6& 73.9$\pm$ 0.5&         \\
-\belowspace
-Vehicle   & 44.9$\pm$ 0.6& 61.5$\pm$ 0.4& $\surd$ \\
-\hline
+\begin{tabular}{cc}
+  \hline
+    Time & Plan
+  \hline
+    Dec 17, 2014 & Combine visual and audio features
+    Dec 20, 2014 & Run estimation for combined features
+    Dec 24, 2014 & Concatenate shots into programs
+    Dec 27, 2014 & 
+  \hline
 \end{tabular}
-\end{sc}
-\end{small}
 \end{center}
-\vskip -0.1in
-\end{table}
 
-Tables contain textual material that can be typeset, as contrasted 
-with figures, which contain graphical material that must be drawn. 
-Specify the contents of each row and column in the table's topmost
-row. Again, you may float tables to a column's top or bottom, and set
-wide tables across both columns, but place two-column tables at the
-top or bottom of the page.
- 
-\subsection{Citations and References} 
+\section{Conclusion}
 
-Please use APA reference format regardless of your formatter
-or word processor. If you rely on the \LaTeX\/ bibliographic 
-facility, use {\tt natbib.sty} and {\tt icml2014.bst} 
-included in the style-file package to obtain this format.
+In this article, we have present our system for video segmentation and classification with a novel way to extract multimedia features and to utilize machine learning methods. We extract SPP, HOG and DNN as visual features, LPC and MFCC as audio features from the original video file. We combine the features and then classify the video into five genres. We use the classification information to gather shots into programs. We implement an application that can parse the result of our algorithm, and playback the video with these additional information.
 
-Citations within the text should include the authors' last names and
-year. If the authors' names are included in the sentence, place only
-the year in parentheses, for example when referencing Arthur Samuel's
-pioneering work \yrcite{Samuel59}. Otherwise place the entire
-reference in parentheses with the authors and year separated by a
-comma \cite{Samuel59}. List multiple references separated by
-semicolons \cite{kearns89,Samuel59,mitchell80}. Use the `et~al.'
-construct only for citations with three or more authors or after
-listing all authors to a publication in an earlier reference \cite{MachineLearningI}.
+With detailed experiments and estimation, we have proved that our algorithm is able to classify the genres of video segments with great precision and efficience. We have compared our algorithm with traditional methods and proved that our method overwhelm traditional methods in both speed and precision. 
 
-Authors should cite their own work in the third person
-in the initial version of their paper submitted for blind review.
-Please refer to Section~\ref{author info} for detailed instructions on how to
-cite your own papers.
+There are still a lot more space for us to improve our performance. 1) Because of the limit of the size of dataset, our machine learning model is not fully trained. Thus with more labeled video data which covers more cases, we confidently believe that our model can have a better performance. 2) We hope we can come up with a way to improve our model accumulatively, which is to train our model each time a new video comes, instead of once-trained-use-forever model.
 
-Use an unnumbered first-level section heading for the references, and 
-use a hanging indent style, with the first line of the reference flush
-against the left margin and subsequent lines indented by 10 points. 
-The references at the end of this document give examples for journal
-articles \cite{Samuel59}, conference publications \cite{langley00}, book chapters \cite{Newell81}, books \cite{DudaHart2nd}, edited volumes \cite{MachineLearningI}, 
-technical reports \cite{mitchell80}, and dissertations \cite{kearns89}. 
-
-Alphabetize references by the surnames of the first authors, with
-single author entries preceding multiple author entries. Order
-references for the same authors by year of publication, with the
-earliest first. Make sure that each reference includes all relevant
-information (e.g., page numbers).
-
-\subsection{Software and Data}
-
-We strongly encourage the publication of software and data with the
-camera-ready version of the paper whenever appropriate.  This can be
-done by including a URL in the camera-ready copy.  However, do not
-include URLs that reveal your institution or identity in your
-submission for review.  Instead, provide an anonymous URL or upload
-the material as ``Supplementary Material'' into the CMT reviewing
-system.  Note that reviewers are not required to look a this material
-when writing their review.
-
-
-% Acknowledgements should only appear in the accepted version. 
-\section*{Acknowledgments} 
- 
-\textbf{Do not} include acknowledgements in the initial version of
-the paper submitted for blind review.
-
-If a paper is accepted, the final camera-ready version can (and
-probably should) include acknowledgements. In this case, please
-place such acknowledgements in an unnumbered section at the
-end of the paper. Typically, this will include thanks to reviewers
-who gave useful comments, to colleagues who contributed to the ideas, 
-and to funding agencies and corporate sponsors that provided financial 
-support.  
-
-
-% In the unusual situation where you want a paper to appear in the
-% references without citing it in the main text, use \nocite
-\nocite{langley00}
-
-\bibliography{example_paper}
+\bibliography{a}
 \bibliographystyle{icml2014}
 
 \end{document} 
