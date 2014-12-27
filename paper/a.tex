@@ -78,8 +78,18 @@ The rest of this article will be arranged as follows: In Section 2, we introduce
 
 \section{Methodology}
 
+\subsection{Overview}
+
+We describe the video segmentation and classification task as follows: given a video from time $0$ to $T$, we predict the genre(or label) for each video segment in time interval $[t, t + \Delta t)$, where $t \in [0, T]$, and $\Delta t$ is the smallest time interval between two frames. Our goal is to minimize the following L1-loss function for one particular video:
+\begin{equation}
+    \int_{0}^{T - \Delta t} \mathcal{I}[g(t) \neq \hat{g}(t)] \mathrm{d} t
+    \label{eq:error}
+\end{equation}
+where $g(t)$ is the ground truth genre in time interval $[t, t + \Delta t)$, and $\hat{g}(t)$ is the predicted genre in time interval $[t, t + \Delta t)$, and $\mathcal{I}[x] = 0$ when $x$ is false; 1 otherwise. Namely, \ref{eq:error} gives the total time where the incorrect predicted genre is given.\par
+This error takes both segmentation and classfication into account: either the wrong segmentation or the wrong classifcation will result in an increase in the loss function.
+
 \subsection{Video Segmentation}
-For video segmentation, we use the software proposed by (cite), which enables fast shot segmentation using global and local visual descriptors. This method can generate segments of shots from one video, which has fairly high accuracy. We did not use scene segmentation, since the scenes can be segmented by classification results - we can combine the continuing shots with the same label into a scene of the label, thus finishing the task fo scene segmentation using shot segmentation.
+For video segmentation, we use the software proposed by \cite{apostolidisfast}, which enables fast shot segmentation using global and local visual descriptors. This method can generate segments of shots from one video, which has fairly high accuracy. We did not use scene segmentation, since the scenes can be segmented by classification results - we can combine the continuing shots with the same label into a scene of the label, thus finishing the task fo scene segmentation using shot segmentation.
 \subsection{Video Classification Pipeline}
 After shots are segmented from a video, we train a classifier to predict the label for one particular shot. For speed and scalability, we extract two feature vectors from the frames and sound of the shot respectively; Then, we train these feature vector separately using popular classfication techniques such as the support vector machine(cite needed); Finally, we combine the weights of the two classifiers by selecting a weight parameter $p$, where $0 < p < 1$. \par
 The reason we train two classifiers separately is as follows:
@@ -90,17 +100,17 @@ The reason we train two classifiers separately is as follows:
 In both settings, we use the LIBLINEAR library for our SVM classifier, which narrows the classification problem down to feature extraction.
 \subsection{Frame Feature Extraction Techniques}
 Feature extraction for a particular frame is largely equivalent to image feature extraction. Therefore, popular image feature extraction techniques are used in our methods. In the following subsections, we present three techniques.
-\subsubsection{Spatial Pyramid Pooling}(cite)
+\subsubsection{Spatial Pyramid Pooling\cite{he2014spatial}}
 Let us construct a sequence of grids at level $0 \ldots L$, such that grid at level $l$ has $2^l$ cells along each dimension. For one image, we use average pooling for each grid, and compute one feature. Combining all the features of every grid in every level, and we have $\sum_{l=0}^{L} 4^l$ features extracted from one image. Figure \ref{fig:spp} demonstrates our method.
 
-%\begin{figure}[H]
-%\centering
-%\includegraphics[width=0.8\textwidth]{spp.png}
-%\label{fig:spp}
-%\caption{Spatial Pyramid Pooling}
-%\end{figure}
+\begin{figure*}
+\centering
+\includegraphics[width=0.8\textwidth]{img/spp.png}
+\label{fig:spp}
+\caption{Spatial Pyramid Pooling}
+\end{figure*}
 
-\subsubsection{Histogram of Oriented Gradients}
+\subsubsection{Histogram of Oriented Gradients\cite{dalal2005histograms}}
 Histogram of Oriented Gradients(HOG) are feature descriptors used in computer vision and image processing for the purpose of object detection. The technique counts occurences of gradient orientation in localized portions of an image. HOG descriptors maintains a few advantages over other methods, since it upholds invariance to geometric and photometric transformations, except for object orientation.\par
 HOG descriptors are computed using the following steps:
 \begin{description}
@@ -112,16 +122,16 @@ In our setting, we scale each image to size $128 \times 128$ and use non-overlap
 
 \subsubsection{Deep Convolutional Activation Feature}
 Recent advances in deep learning have enable researchers to apply deep convolutional neural networks (CNN) to large-scale visual recognition tasks. These models perform extremely well in domains with large amounts of training data, outperforming all known methods on a large scale recognition challenge.\par
-However, in other tasks with limited training data, deep neural networks tend to dramatically overfit. To deal with this problem, Donahue et al.(cite) explored a semi-supervised, transfer learning method, which uses a supervised pre-trained deep neural network to extract features. One popular feature selection method is to use activation values in one layer of deep neural network. Donahue et al. have empiracally validated that a generic visual feature based on a convolutional network trained on the ImageNet dataset(cite) outperforms a host of conventional visual representations on standard benchmark object recognition tasks.\par
-In our setting, we use the famous AlexNet by Krizhevsky et al. (cite), which contains eight layers with weights: the first five are convolutional and the remaining three are fully connected. The output of the last fully-connected layer is fed to a 1000-way softmax which produces a distribution over the 1000 class labels. The structure of the AlexNet is in figure \ref{fig:alexnet}. Please refer to (cite) for more details of the network. \par
+However, in other tasks with limited training data, deep neural networks tend to dramatically overfit. To deal with this problem, Donahue et al.\cite{donahue2013decaf} explored a semi-supervised, transfer learning method, which uses a supervised pre-trained deep neural network to extract features. One popular feature selection method is to use activation values in one layer of deep neural network. Donahue et al. have empiracally validated that a generic visual feature based on a convolutional network trained on the ImageNet dataset outperforms a host of conventional visual representations on standard benchmark object recognition tasks.\par
+In our setting, we use the famous AlexNet by Krizhevsky et al.\cite{krizhevsky2012imagenet}, which contains eight layers with weights: the first five are convolutional and the remaining three are fully connected. The output of the last fully-connected layer is fed to a 1000-way softmax which produces a distribution over the 1000 class labels. The structure of the AlexNet is in figure \ref{fig:alexnet}. Please refer to \cite{krizhevsky2012imagenet} for more details of the network. \par
 
-%\begin{figure}
-%\includegraphics[width=1.0\textwidth]{alexnet.png}
-%\label{fig:alexnet}
-%\caption{Structure of AlexNet}
-%\end{figure}
+\begin{figure*}
+\includegraphics[width=1.0\textwidth]{img/alexnet.png}
+\label{fig:alexnet}
+\caption{Structure of AlexNet}
+\end{figure*}
 
-We use the seventh layer of AlexNet, which has 4096 neuron activations, as our extracted features. We use Caffe(cite), an open source framework for training deep nerual networks on GPUs, and a model trained on ImageNet using Caffe, to extract our features. For each image, we simply do forward propagation, using the image pixel intesities as inputs, and compute the neuron activations of the particular level. Using a GPU, we can speed up the computation by 5 to 10 times.
+We use the seventh layer of AlexNet, which has 4096 neuron activations, as our extracted features. We use Caffe\cite{jia2014caffe}, an open source framework for training deep nerual networks on GPUs, and a model trained on ImageNet using Caffe, to extract our features. For each image, we simply do forward propagation, using the image pixel intesities as inputs, and compute the neuron activations of the particular level. Using a GPU, we can speed up the computation by 5 to 10 times.
 
 \subsection{Audio Feature Extraction Techniques}
 \subsubsection{Mel-Frequency Cepstrum Coefficients}
@@ -190,17 +200,71 @@ In our setting, we compute a 12-dimensional feature vector for the LPCs, which g
 
 \subsection{Experiment}
 
-\subsubsection{audio features}
+  \subsubsection{Frame Classication}
 
-To calculate LPCs and MFCC features, a python library essentia is used. Essentia is an open-source C++ library for audio analysis and audio-based music information retrieval with Python bindings.
+  We implement Spatial Pyramid Pooling(SPP), Histogram of Oriented Gradients(HOG) and Deep Neural Network Activations(DNN) using details explained in (section ii). We used LIBLINEAR(cite) for large scale linear SVM traning, which greatly reduces the training time. We used a ThinkPad T430 laptop(which contains a NVIDIA GPU) in Ubuntu 14.10 for experiments.
 
-To achieve a better performance, the video clips are segmented into shots firstly. For every single shot of video segment, we calculate the LPCs and MFCC with a window size of 0.02 microsecond and a hop size of 0.01 microsecond. For each slide of time, 12 LPCs and 12 MFCC values will be extracted. After LPCs and MFCC are extracted for a shot, the values will be averaged by time. Thus there will be 12 LPCs and 12 MFCC values for each shot eventually, i.e. 24 audio features for a single shot. 
+  In frame classification, we consider two scenarios:
 
-After audio features extracted, LibSVM is used to estimate the features. The video clips are randomly shaffled into two gruops, the training group and the prediction group. 
+  \begin{description}
+      \item[Validation] The system has trained over most TV shows, so any frame in the test set should have some resemblance with the training set. This is more similar to the real-world setting.
+      \item[Test] The system recieves new TV shows from time to time, so some frame in the test set might be totally different from the training set. This is used mainly to determine the model's robustness, as well as its efficiency under a small dataset.
+  \end{description}
 
-Since most of the video clips in the predicition group have a close copy in the training group, the accuracy achieves as high as over 80\%. And both the feature extraction and LibSVM can be done in less than one minute.
+  Note that the names(Validation and Test) are used for the sole purpose of simplicity.
 
-The experiment for a larger dataset is on its way.
+  The classification accuracy for the methods are in table \ref{table:frame-classify}, where the best results are marked in bold:
+
+  \begin{table}
+      \begin{tabular}{cccc}
+          \hline
+                     & SPP       & HOG       & DNN \\\hline
+          Validation & 95.0963\% & 99.3496\% & 99.8032\% \\\hline
+          Test       & 19.7744\% & 46.2514\% & 57.0422\% \\\hline
+      \end{tabular}
+      \caption{Frame Classification Results}
+      \label{table:frame-classify}
+  \end{table}
+
+  The SVM configuration for the experiments are the same.\par
+  In the Validation scenario, both three models have fairly good accuracy, which is because the test shots have much resemblance to the training shots, so that the test is almost equivalent to validation on the training set(hence the name). However, DNN still outperforms the other two models slightly. 
+
+  In the Test scenario, we can find that the accuracy of SPP has dropped significantly(even below random guessing), which indicates that SPP overfits the training data substantially, and fails to perform well when new data arrives. HOG and DNN have good accuracies, while DNN outperforms the former by over 10 percent. Therefore, features extracted by DNN contains more descriptive information in the image, and are much more robust than the other two models.
+
+  Feature extraction speed in SPP, HOG, and DNN have huge difference, which can be shown in table \ref{table:frame-speed}:
+
+  \begin{table}
+      \begin{tabular}{cccc}
+          \hline
+          & SPP & HOG & DNN \\
+          \hline
+          Images processed per second & 10.1 & 35.9 & 24.7 \\
+          \hline
+      \end{tabular}
+      \caption{Feature Extraction Speed}
+      \label{table:frame-speed}
+  \end{table}
+  This is mainly due to HOG and DNN use GPU to speed up feature extraction time, whilst SPP uses CPU for feature extraction.\par
+  After feature extraction, the SVM training and testing time for the three models have little difference.
+
+  \subsubsection{Audio Features}
+
+  To calculate LPCs and MFCC features, a python library essentia is used. Essentia is an open-source C++ library for audio analysis and audio-based music information retrieval with Python bindings.
+
+  To achieve a better performance, the video clips are segmented into shots firstly. For every single shot of video segment, we calculate the LPCs and MFCC with a window size of 20 microsecond and a hop size of 10 microsecond. For each slide of time, 12 LPCs and 12 MFCC values will be extracted. After LPCs and MFCC are extracted for a shot, the values will be averaged by time. Thus there will be 12 LPCs and 12 MFCC values for each shot eventually, i.e. 24 audio features for a single shot. 
+
+  After audio features extracted, LibSVM is used to estimate the features. The video clips are randomly shaffled into two gruops, the training group and the prediction group. 
+
+  To make things more clear, we compare the performance among different audio feature vectors. We run classification algorithm with MFCC features only and LPC features only to see how the combination of MFCC and LPC features enhance the performance. The result shows below.
+  
+  \begin{figure}[H]
+    \centering \includegraphics[width=\textwidth/2]{img/audio.pdf}
+    \caption{The classification performance with different number of audio features}
+  \end{figure}
+
+  As the figure shows above, the accuracy reaches the highest when using MFCC+LPCC audio features as 83\%. The classification works the worst and deteriorates the fastest when using MFCC features only. 
+  
+  With this experiment, we also prove that the audio feature extraction and classification is practical in the cost of time. Both the feature extraction and LibSVM can be done in less than one minute.
 
 \subsubsection{combined experiment}
 
@@ -215,14 +279,14 @@ Secondly, we plan to come up with a method to combine shots into programs, and r
 The following table contains more information in detail.
 
 \begin{center}
-\begin{tabular}{cc}
+\begin{tabular}{cp{5cm}}
   \hline
-    Time & Plan
+    Time & Plan\\
   \hline
-    Dec 17, 2014 & Combine visual and audio features
-    Dec 20, 2014 & Run estimation for combined features
-    Dec 24, 2014 & Concatenate shots into programs
-    Dec 27, 2014 & 
+    Dec 17, 2014 & Combine visual and audio features\\
+    Dec 20, 2014 & Run estimation for combined features\\
+    Dec 24, 2014 & Concatenate shots into programs\\
+    Dec 27, 2014 & Estimate the performance of the overall system\\
   \hline
 \end{tabular}
 \end{center}

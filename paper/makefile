@@ -1,5 +1,5 @@
 all:
-	latex a.tex
+	pdflatex a.tex
 	bibtex a
 	pdflatex a.tex
 	cp a.pdf dsp-srt.pdf

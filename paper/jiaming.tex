@@ -1,4 +1,11 @@
-\section{Video Segmentation and Classfication}
+\section{Video Segmentation and Classification}
+We describe the video segmentation and classification task as follows: given a video from time $0$ to $T$, we predict the genre(or label) for each video segment in time interval $[t, t + \Delta t)$, where $t \in [0, T]$, and $\Delta t$ is the smallest time interval between two frames. Our goal is to minimize the following L1-loss function for one particular video:
+\begin{equation}
+    \int_{0}^{T - \Delta t} \mathcal{I}[g(t) \neq \hat{g}(t)] \mathrm{d} t
+    \label{eq:error}
+\end{equation}
+where $g(t)$ is the ground truth genre in time interval $[t, t + \Delta t)$, and $\hat{g}(t)$ is the predicted genre in time interval $[t, t + \Delta t)$, and $\mathcal{I}[x] = 0$ when $x$ is false; 1 otherwise. Namely, \ref{eq:error} gives the total time where the incorrect predicted genre is given.\par
+This error takes both segmentation and classfication into account: either the wrong segmentation or the wrong classifcation will result in an increase in the loss function.
 \subsection{Video Segmentation}
 For video segmentation, we use the software proposed by (cite), which enables fast shot segmentation using global and local visual descriptors. This method can generate segments of shots from one video, which has fairly high accuracy. We did not use scene segmentation, since the scenes can be segmented by classification results - we can combine the continuing shots with the same label into a scene of the label, thus finishing the task fo scene segmentation using shot segmentation.
 \subsection{Video Classification Pipeline}
@@ -14,12 +21,12 @@ Feature extraction for a particular frame is largely equivalent to image feature
 \subsubsection{Spatial Pyramid Pooling}(cite)
 Let us construct a sequence of grids at level $0 \ldots L$, such that grid at level $l$ has $2^l$ cells along each dimension. For one image, we use average pooling for each grid, and compute one feature. Combining all the features of every grid in every level, and we have $\sum_{l=0}^{L} 4^l$ features extracted from one image. Figure \ref{fig:spp} demonstrates our method.
 
-%\begin{figure}[H]
-%\centering
-%\includegraphics[width=0.8\textwidth]{spp.png}
-%\label{fig:spp}
-%\caption{Spatial Pyramid Pooling}
-%\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{spp.png}
+\label{fig:spp}
+\caption{Spatial Pyramid Pooling}
+\end{figure}
 
 \subsection{Histogram of Oriented Gradients}
 Histogram of Oriented Gradients(HOG) are feature descriptors used in computer vision and image processing for the purpose of object detection. The technique counts occurences of gradient orientation in localized portions of an image. HOG descriptors maintains a few advantages over other methods, since it upholds invariance to geometric and photometric transformations, except for object orientation.\par
@@ -36,11 +43,11 @@ Recent advances in deep learning have enable researchers to apply deep convoluti
 However, in other tasks with limited training data, deep neural networks tend to dramatically overfit. To deal with this problem, Donahue et al.(cite) explored a semi-supervised, transfer learning method, which uses a supervised pre-trained deep neural network to extract features. One popular feature selection method is to use activation values in one layer of deep neural network. Donahue et al. have empiracally validated that a generic visual feature based on a convolutional network trained on the ImageNet dataset(cite) outperforms a host of conventional visual representations on standard benchmark object recognition tasks.\par
 In our setting, we use the famous AlexNet by Krizhevsky et al. (cite), which contains eight layers with weights: the first five are convolutional and the remaining three are fully connected. The output of the last fully-connected layer is fed to a 1000-way softmax which produces a distribution over the 1000 class labels. The structure of the AlexNet is in figure \ref{fig:alexnet}. Please refer to (cite) for more details of the network. \par
 
-%\begin{figure}
-%\includegraphics[width=1.0\textwidth]{alexnet.png}
-%\label{fig:alexnet}
-%\caption{Structure of AlexNet}
-%\end{figure}
+\begin{figure}
+\includegraphics[width=1.0\textwidth]{alexnet.png}
+\label{fig:alexnet}
+\caption{Structure of AlexNet}
+\end{figure}
 
 We use the seventh layer of AlexNet, which has 4096 neuron activations, as our extracted features. We use Caffe(cite), an open source framework for training deep nerual networks on GPUs, and a model trained on ImageNet using Caffe, to extract our features. For each image, we simply do forward propagation, using the image pixel intesities as inputs, and compute the neuron activations of the particular level. Using a GPU, we can speed up the computation by 5 to 10 times.
 
@@ -68,4 +75,45 @@ $$R(i) = \mathrm{E}[x(n)x(n-i)]$$
 and $\mathrm{E}$ is the expected value.\par
 In our setting, we compute a 12-dimensional feature vector for the LPCs, which gives us a feature vector of length 24 after combining with MFCCs.
 
+\section{Experiments}
+\subsection{Frame Classication}
+\subsubsection{Environment}
+We implement Spatial Pyramid Pooling(SPP), Histogram of Oriented Gradients(HOG) and Deep Neural Network Activations(DNN) using details explained in (section ii). We used LIBLINEAR(cite) for large scale linear SVM traning, which greatly reduces the training time. We used a ThinkPad T430 laptop(which contains a NVIDIA GPU) in Ubuntu 14.10 for experiments.\par
+\subsubsection{Scenarios}
+In frame classification, we consider two scenarios:
+\begin{description}
+    \item[Validation] The system has trained over most TV shows, so any frame in the test set should have some resemblance with the training set. This is more similar to the real-world setting.
+    \item[Test] The system recieves new TV shows from time to time, so some frame in the test set might be totally different from the training set. This is used mainly to determine the model's robustness, as well as its efficiency under a small dataset.
+\end{description}
+Note that the names(Validation and Test) are used for the sole purpose of simplicity.
+\subsubsection{Accuracy}
+The classification accuracy for the methods are in table \ref{table:frame-classify}, where the best results are marked in bold:
+
+\begin{table}
+    \begin{tabular}[|c|c|c|c|]
+        \hline
+                   & SPP       & HOG       & DNN \\\hline
+        Validation & 95.0963\% & 99.3496\% & 99.8032\% \\\hline
+        Test       & 19.7744\% & 46.2514\% & 57.0422\% \\\hline
+    \end{tabular}
+    \caption{Frame Classification Results}
+    \label{table:frame-classify}
+\end{table}
+The SVM configuration for the experiments are the same.\par
+In the Validation scenario, both three models have fairly good accuracy, which is because the test shots have much resemblance to the training shots, so that the test is almost equivalent to validation on the training set(hence the name). However, DNN still outperforms the other two models slightly. \par
+In the Test scenario, we can find that the accuracy of SPP has dropped significantly(even below random guessing), which indicates that SPP overfits the training data substantially, and fails to perform well when new data arrives. HOG and DNN have good accuracies, while DNN outperforms the former by over 10 percent. Therefore, features extracted by DNN contains more descriptive information in the image, and are much more robust than the other two models.
+\subsubsection{Time}
+Feature extraction speed in SPP, HOG, and DNN have huge difference, which can be shown in table \ref{table:frame-speed}:\par
+
+\begin{table}
+    \begin{tabular}[|c|c|c|c|]
+        \hline
+        & SPP & HOG & DNN \\\hline
+        Images processed per second & 10.1 & 35.9 & 24.7 \\\hline
+    \end{tabular}
+    \caption{Feature Extraction Speed}
+    \label{table:frame-speed}
+\end{table}
+This is mainly due to HOG and DNN use GPU to speed up feature extraction time, whilst SPP uses CPU for feature extraction.\par
+After feature extraction, the SVM training and testing time for the three models have little difference.
 
